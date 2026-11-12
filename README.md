@@ -1,5 +1,7 @@
 # Industrial AI Index
 
+Live: [industrial-ai.radhakrishnakamaraju.com](https://industrial-ai.radhakrishnakamaraju.com). Part of [radhakrishnakamaraju.com](https://radhakrishnakamaraju.com), alongside [rk-site](https://github.com/radhakrishna-kamaraju/rk-site) and [rk-assistant](https://github.com/radhakrishna-kamaraju/rk-assistant).
+
 An AI readiness assessment for manufacturers. Twelve or thirty-two questions across four areas, a score, and a short strategic report written by Claude.
 
 ## How it works
@@ -11,18 +13,22 @@ An AI readiness assessment for manufacturers. Twelve or thirty-two questions acr
 
 ## Limits and privacy
 
-- Rate limits: 5 reports per IP per hour and 200 per day in total (both configurable in `.env`).
+- Rate limits: 3 reports per visitor per hour and 10 per day in total (both configurable in `.env`). Counters are in memory and reset when the container restarts.
 - Nothing is stored: no email capture, no database, no request bodies in logs.
 - Fonts and the PDF library are served from this site; the page makes no third-party requests.
 
 ## Run
 
 ```
-cp .env.example .env   # add ANTHROPIC_API_KEY
+cp .env.example .env   # add ANTHROPIC_API_KEY (optionally ANTHROPIC_WORKSPACE_ID, ANTHROPIC_MODEL)
 docker compose up -d --build
 ```
 
 On the VPS, Traefik serves it at https://industrial-ai.radhakrishnakamaraju.com. Without Docker: `ANTHROPIC_API_KEY=... node server.js`, then open http://localhost:3000.
+
+## Deploy
+
+Push to `main`; a cron job on the VPS pulls every 5 minutes and rebuilds the container if anything changed. `.env` is git-ignored, so deploys never touch the key.
 
 ## Credit
 
