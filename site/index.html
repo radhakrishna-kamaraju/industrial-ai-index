@@ -52,6 +52,7 @@ body{background:#0F1B2D;color:#F4F1EA;font-family:'Space Grotesk',system-ui,sans
 .footer-links{display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
 .footer-link{font-size:12px;color:#A9B4C4;text-decoration:none;transition:color 0.2s;}
 .footer-link:hover{color:#F2A33A;}
+.report-text strong,.report-bullet strong,.report-numbered strong{color:#F4F1EA;font-weight:700;}
 .footer-credit{margin-top:18px;font-size:11px;color:#7F8CA0;line-height:1.6;max-width:640px;}
 .footer-credit a{color:#A9B4C4;text-decoration:underline;text-underline-offset:2px;}
 .footer-credit a:hover{color:#F2A33A;}
@@ -595,12 +596,13 @@ function renderResults(){
 
 function formatReport(text){
   if(!text)return"";
+  const inl=t=>t.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
   return esc(text).split("\n").map(line=>{
     if(line.match(/^\*\*(.+)\*\*$/))return`<div class="report-section">${line.replace(/\*\*/g,"")}</div>`;
-    if(line.startsWith("- "))return`<div class="report-bullet"><span class="report-bullet-arrow">→</span><span>${line.slice(2)}</span></div>`;
-    if(line.match(/^\d+\./))return`<div class="report-numbered"><span class="report-num">${line.match(/^\d+/)[0]}.</span><span>${line.replace(/^\d+\.\s*/,"")}</span></div>`;
+    if(line.startsWith("- "))return`<div class="report-bullet"><span class="report-bullet-arrow">→</span><span>${inl(line.slice(2))}</span></div>`;
+    if(line.match(/^\d+\./))return`<div class="report-numbered"><span class="report-num">${line.match(/^\d+/)[0]}.</span><span>${inl(line.replace(/^\d+\.\s*/,""))}</span></div>`;
     if(!line.trim())return`<div style="height:3px;"></div>`;
-    return`<div class="report-text">${line}</div>`;
+    return`<div class="report-text">${inl(line)}</div>`;
   }).join("");
 }
 
