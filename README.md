@@ -23,3 +23,9 @@ docker compose up -d --build
 ```
 
 On the VPS, Traefik serves it at https://industrial-ai.radhakrishnakamaraju.com. Without Docker: `ANTHROPIC_API_KEY=... node server.js`, then open http://localhost:3000.
+
+## Credit
+
+The four assessment areas are inspired by Microsoft's e-book
+[The Industrial Frontier: Four ways manufacturers can modernize across the value chain](https://info.microsoft.com/ww-landing-the-industrial-frontier.html?lcid=en-us).
+The questions, scoring and report prompts are original. This is an independent project, not affiliated with or endorsed by Microsoft.
