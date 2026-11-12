@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Industrial AI Index</title>
+<meta name="description" content="A free AI readiness assessment for manufacturers: product lifecycle, factory operations, human-agent collaboration and supply chain."/>
+<meta property="og:title" content="Industrial AI Index"/>
+<meta property="og:description" content="Where does your manufacturing organisation stand on AI? Take the assessment."/>
+<meta property="og:type" content="website"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F1B2D'/%3E%3Ctext x='32' y='42' font-family='monospace' font-size='26' font-weight='700' text-anchor='middle' fill='%23F2A33A'%3EAI%3C/text%3E%3C/svg%3E">
+<style>
+@font-face{font-family:"Space Grotesk";font-weight:400;font-display:swap;src:url("fonts/space-grotesk-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Space Grotesk";font-weight:500 600;font-display:swap;src:url("fonts/space-grotesk-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Space Grotesk";font-weight:700 800;font-display:swap;src:url("fonts/space-grotesk-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-weight:400;font-display:swap;src:url("fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-weight:500 600;font-display:swap;src:url("fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2")}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0F1B2D;color:#F4F1EA;font-family:'Space Grotesk',system-ui,sans-serif;min-height:100vh;}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(242,163,58,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(242,163,58,0.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.glow{position:fixed;top:-150px;right:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(242,163,58,0.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:20px 20px 80px;}
+/* ── HERO BANNER ── */
+.hero{position:relative;width:100%;height:240px;border-radius:16px;overflow:hidden;margin-bottom:28px;background:linear-gradient(135deg,#0B1524 0%,#12233A 50%,#0B1524 100%);border:1px solid rgba(242,163,58,0.2);}
+.hero-svg{position:absolute;inset:0;width:100%;height:100%;}
+.hero-content{position:absolute;bottom:0;left:0;right:0;padding:24px 28px;background:linear-gradient(to top,rgba(11,21,36,0.95) 0%,rgba(11,21,36,0.6) 60%,transparent 100%);}
+.hero-eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.hero-eyebrow-line{width:16px;height:2px;background:#F2A33A;}
+.hero-eyebrow-text{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;color:#F2A33A;letter-spacing:0.2em;text-transform:uppercase;}
+.hero-title{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;color:#fff;}
+.hero-title span{color:#F2A33A;}
+.hero-tagline{font-size:12px;color:#A9B4C4;margin-top:6px;line-height:1.5;}
+.hero-stats{position:absolute;top:16px;left:16px;display:flex;gap:12px;}
+.hero-stat{text-align:center;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:6px 12px;backdrop-filter:blur(8px);}
+.hero-stat-val{font-size:16px;font-weight:800;color:#F2A33A;line-height:1;}
+.hero-stat-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:7px;color:#A9B4C4;letter-spacing:0.08em;margin-top:2px;}
+/* Factory SVG animations */
+@keyframes conveyor{from{transform:translateX(0);}to{transform:translateX(-40px);}}
+@keyframes robotArm{0%,100%{transform:rotate(-15deg);}50%{transform:rotate(15deg);}}
+@keyframes spark{0%,100%{opacity:0;transform:scale(0);}50%{opacity:1;transform:scale(1);}}
+@keyframes scanLine{from{transform:translateY(0);}to{transform:translateY(180px);}}
+@keyframes dataFlow{0%{opacity:0;transform:translateY(0);}50%{opacity:1;}100%{opacity:0;transform:translateY(-30px);}}
+@keyframes pulse2{0%,100%{r:3;}50%{r:5;}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+/* ── FOOTER ── */
+.footer{margin-top:48px;padding:28px 0 12px;border-top:1px solid rgba(255,255,255,0.05);}
+.footer-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;}
+.footer-brand{}
+.footer-logo{font-size:15px;font-weight:800;color:#F4F1EA;letter-spacing:0.01em;}
+.footer-logo span{color:#F2A33A;}
+.footer-desc{font-size:11px;color:#A9B4C4;margin-top:5px;max-width:300px;line-height:1.6;}
+.footer-links{display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+.footer-link{font-size:12px;color:#A9B4C4;text-decoration:none;transition:color 0.2s;}
+.footer-link:hover{color:#F2A33A;}
+.footer-bottom{margin-top:20px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.03);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.footer-copy{font-size:11px;color:#7F8CA0;}
+.footer-powered{font-size:11px;color:#7F8CA0;}
+.footer-powered span{color:#A9B4C4;}
+/* ── SPLASH ── */
+.splash{position:fixed;inset:0;background:#0F1B2D;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s ease;}
+.splash.hidden{opacity:0;pointer-events:none;}
+.splash-logo{font-size:28px;font-weight:800;color:#fff;letter-spacing:-0.02em;margin-bottom:8px;}
+.splash-logo span{color:#F2A33A;}
+.splash-sub{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#7F8CA0;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:40px;}
+.splash-bar{width:200px;height:2px;background:rgba(255,255,255,0.05);border-radius:1px;overflow:hidden;}
+.splash-bar-fill{height:100%;background:#F2A33A;border-radius:1px;animation:splashLoad 1.2s ease forwards;}
+@keyframes splashLoad{from{width:0;}to{width:100%;}}
+.card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:22px;margin-bottom:18px;}
+/* Mode selector */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
+.mode-card{background:rgba(255,255,255,0.02);border:2px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;}
+.mode-card.selected{background:rgba(242,163,58,0.08);border-color:#F2A33A;}
+.mode-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.mode-card-title{font-size:15px;font-weight:700;color:#F4F1EA;transition:color 0.2s;}
+.mode-card.selected .mode-card-title{color:#F2A33A;}
+.mode-badge{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#A9B4C4;background:rgba(255,255,255,0.04);padding:3px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.08);white-space:nowrap;transition:all 0.2s;}
+.mode-card.selected .mode-badge{color:#F2A33A;background:rgba(242,163,58,0.1);border-color:rgba(242,163,58,0.3);}
+.mode-qs{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#A9B4C4;margin-bottom:10px;letter-spacing:0.05em;}
+.mode-desc{font-size:12px;color:#A9B4C4;line-height:1.6;margin-bottom:8px;}
+.mode-who{font-size:11px;color:#7F8CA0;line-height:1.5;}
+.mode-card.selected .mode-who{color:rgba(242,163,58,0.5);}
+/* Area mini cards */
+.area-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;}
+.area-mini{background:rgba(255,255,255,0.02);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.area-mini-icon{font-size:16px;}
+.area-mini-title{font-size:11px;font-family:'IBM Plex Mono',ui-monospace,monospace;}
+.area-mini-qs{font-size:10px;color:#7F8CA0;margin-top:2px;}
+/* Inputs */
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px;}
+.field label{display:block;font-size:10px;color:#A9B4C4;font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:7px;}
+.field input,.field select{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 12px;color:#F4F1EA;font-size:13px;outline:none;font-family:inherit;}
+.field select{background:#17283F;}
+.field input::placeholder{color:#5E6E87;}
+/* Buttons */
+.btn-primary{width:100%;padding:15px;background:#F2A33A;border:none;border-radius:10px;color:#0F1B2D;font-weight:700;font-size:14px;cursor:pointer;transition:opacity 0.2s;font-family:inherit;}
+.btn-primary:hover{opacity:0.88;}
+.btn-primary:disabled{background:rgba(255,255,255,0.05);color:#7F8CA0;cursor:not-allowed;opacity:1;}
+.btn-ghost{padding:12px;background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#A9B4C4;font-size:13px;cursor:pointer;transition:all 0.15s;font-family:inherit;width:100%;}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.18);color:#F4F1EA;}
+.btn-row{display:flex;gap:10px;margin-top:0;}
+/* Progress arcs */
+.area-progress{display:flex;gap:6px;margin-bottom:24px;}
+.area-prog-item{flex:1;}
+.area-prog-top{display:flex;justify-content:space-between;margin-bottom:4px;}
+.area-prog-icon{font-size:9px;font-family:'IBM Plex Mono',ui-monospace,monospace;letter-spacing:0.05em;text-transform:uppercase;}
+.area-prog-count{font-size:9px;font-family:'IBM Plex Mono',ui-monospace,monospace;}
+.prog-track{height:3px;background:rgba(255,255,255,0.05);border-radius:2px;}
+.prog-fill{height:100%;border-radius:2px;transition:width 0.4s ease;}
+/* Question */
+.q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.q-badge{display:inline-flex;align-items:center;gap:7px;border-radius:6px;padding:4px 11px;}
+.q-badge-icon{font-size:13px;}
+.q-badge-title{font-size:10px;font-family:'IBM Plex Mono',ui-monospace,monospace;}
+.q-badge-layer{font-size:9px;font-family:'IBM Plex Mono',ui-monospace,monospace;padding:1px 6px;border-radius:3px;}
+.q-num{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#7F8CA0;}
+.q-progress{height:2px;background:rgba(255,255,255,0.05);border-radius:1px;margin-bottom:26px;}
+.q-progress-fill{height:100%;border-radius:1px;transition:width 0.4s ease;}
+.q-text{font-size:clamp(15px,2.8vw,19px);font-weight:600;line-height:1.45;margin-bottom:22px;letter-spacing:-0.01em;}
+/* Options */
+.options{display:flex;flex-direction:column;gap:8px;margin-bottom:28px;}
+.option-btn{text-align:left;padding:12px 16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:10px;color:#C9D2DE;font-size:13px;cursor:pointer;transition:all 0.13s;display:flex;align-items:center;gap:12px;font-family:inherit;width:100%;}
+.option-btn:hover{border-color:rgba(255,255,255,0.2);color:#F4F1EA;}
+.option-btn.selected{color:#fff;}
+.option-num{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;min-width:18px;flex-shrink:0;}
+.answered-count{text-align:center;margin-top:14px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#7F8CA0;}
+/* Loading */
+.loading{text-align:center;padding:60px 20px;}
+.loading-dots{margin-bottom:20px;}
+.loading-dot{display:inline-block;margin:4px;width:8px;height:8px;border-radius:50%;}
+.loading-text{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:#F2A33A;letter-spacing:0.1em;}
+.loading-sub{font-size:12px;color:#A9B4C4;margin-top:6px;}
+/* Results */
+.mode-pill{display:flex;justify-content:center;margin-bottom:16px;}
+.mode-pill span{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:0.1em;}
+.score-hero{border-radius:14px;padding:26px;margin-bottom:18px;text-align:center;}
+.score-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#A9B4C4;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;}
+.score-big{font-size:66px;font-weight:800;line-height:1;letter-spacing:-0.04em;}
+.score-level{font-size:16px;font-weight:700;color:#F4F1EA;margin-top:6px;letter-spacing:0.05em;}
+.score-desc{font-size:12px;color:#A9B4C4;margin-top:6px;max-width:380px;margin-left:auto;margin-right:auto;}
+.areas-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+.area-result{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;}
+.area-result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.area-result-name{font-size:11px;font-family:'IBM Plex Mono',ui-monospace,monospace;}
+.area-result-score{font-weight:700;font-size:15px;}
+.area-bar-track{height:4px;background:rgba(255,255,255,0.06);border-radius:4px;}
+.area-bar-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+.layer-scores{display:flex;gap:6px;margin-top:8px;}
+.layer-score-item{flex:1;text-align:center;}
+.layer-score-label{font-size:8px;font-family:'IBM Plex Mono',ui-monospace,monospace;color:#7F8CA0;margin-bottom:2px;}
+.layer-score-val{font-size:10px;font-weight:600;}
+/* AI Report */
+.report-box{background:rgba(255,255,255,0.02);border:1px solid rgba(242,163,58,0.15);border-radius:12px;padding:22px;margin-bottom:18px;}
+.report-header{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.report-dot{width:6px;height:6px;border-radius:50%;background:#F2A33A;}
+.report-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#F2A33A;letter-spacing:0.1em;}
+.report-section{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#F2A33A;letter-spacing:0.12em;text-transform:uppercase;margin-top:18px;margin-bottom:5px;font-weight:600;}
+.report-bullet{display:flex;gap:8px;color:#C9D2DE;font-size:13px;line-height:1.65;margin-bottom:5px;}
+.report-bullet-arrow{color:#F2A33A;flex-shrink:0;}
+.report-numbered{display:flex;gap:10px;color:#C9D2DE;font-size:13px;line-height:1.65;margin-bottom:6px;}
+.report-num{color:#F28B82;font-family:'IBM Plex Mono',ui-monospace,monospace;flex-shrink:0;min-width:14px;}
+.report-text{color:#C9D2DE;font-size:13px;line-height:1.65;margin-bottom:3px;}
+.email-section{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:22px;margin-bottom:18px;}
+.email-section-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#A9B4C4;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;}
+.btn-pdf{width:100%;padding:13px;background:#F2A33A;border:none;border-radius:10px;color:#0F1B2D;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:opacity 0.2s;}
+.btn-pdf:hover{opacity:0.9;}
+.btn-pdf:disabled{opacity:0.7;cursor:wait;}
+/* Maturity scale */
+.scale-box{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:18px;margin-bottom:12px;}
+.scale-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#A9B4C4;margin-bottom:12px;letter-spacing:0.1em;}
+.scale-track{display:flex;gap:4px;}
+.scale-item{flex:1;text-align:center;}
+.scale-bar{height:5px;border-radius:3px;margin-bottom:5px;transition:all 0.3s;}
+.scale-name{font-size:9px;font-family:'IBM Plex Mono',ui-monospace,monospace;}
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+.fade-in{animation:fadeIn 0.4s ease;}
+.pulse{animation:pulse 2s infinite;}
+@media(max-width:480px){
+  .mode-grid{grid-template-columns:1fr;}
+  .area-grid{grid-template-columns:1fr;}
+  .areas-grid{grid-template-columns:1fr;}
+  .meta-grid{grid-template-columns:1fr;}
+  .scale-name{font-size:7px;}
+}
+</style>
+</head>
+<body>
+<!-- Splash screen -->
+<div class="splash" id="splash">
+  <div class="splash-logo">Industrial <span>AI</span> Index</div>
+  <div class="splash-sub">AI readiness assessment</div>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+</div>
+
+<div class="grid-bg"></div>
+<div class="glow"></div>
+
+<!-- Factory hero banner -->
+<div style="position:relative;z-index:1;max-width:760px;margin:28px auto 0;padding:0 20px;">
+<div class="hero">
+  <!-- Animated factory SVG -->
+  <svg class="hero-svg" viewBox="0 0 800 240" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="skyGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#0B1524"/>
+        <stop offset="50%" stop-color="#12233A"/>
+        <stop offset="100%" stop-color="#0B1524"/>
+      </linearGradient>
+      <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F2A33A" stop-opacity="0.08"/>
+        <stop offset="100%" stop-color="#F2A33A" stop-opacity="0.01"/>
+      </linearGradient>
+      <filter id="glow1"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <!-- Background -->
+    <rect width="800" height="240" fill="url(#skyGrad)"/>
+    <!-- Subtle grid -->
+    <line x1="0" y1="170" x2="800" y2="170" stroke="#F2A33A" stroke-opacity="0.06" stroke-width="1"/>
+    <line x1="0" y1="195" x2="800" y2="195" stroke="#F2A33A" stroke-opacity="0.04" stroke-width="1"/>
+    <line x1="200" y1="0" x2="200" y2="240" stroke="#F2A33A" stroke-opacity="0.03" stroke-width="1"/>
+    <line x1="400" y1="0" x2="400" y2="240" stroke="#F2A33A" stroke-opacity="0.03" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="240" stroke="#F2A33A" stroke-opacity="0.03" stroke-width="1"/>
+    <!-- Factory building RIGHT side -->
+    <rect x="520" y="70" width="160" height="100" fill="#0B1524" stroke="#F2A33A" stroke-opacity="0.2" stroke-width="1"/>
+    <rect x="540" y="50" width="120" height="22" fill="#0B1524" stroke="#F2A33A" stroke-opacity="0.15" stroke-width="1"/>
+    <!-- Factory windows -->
+    <rect x="535" y="85" width="18" height="13" fill="#F2A33A" fill-opacity="0.15" rx="2"/>
+    <rect x="563" y="85" width="18" height="13" fill="#F2A33A" fill-opacity="0.25" rx="2"/>
+    <rect x="591" y="85" width="18" height="13" fill="#F2A33A" fill-opacity="0.1" rx="2"/>
+    <rect x="619" y="85" width="18" height="13" fill="#F2A33A" fill-opacity="0.2" rx="2"/>
+    <rect x="535" y="110" width="18" height="13" fill="#F2A33A" fill-opacity="0.2" rx="2" style="animation:blink 2.5s ease infinite;"/>
+    <rect x="563" y="110" width="18" height="13" fill="#A9B4C4" fill-opacity="0.3" rx="2"/>
+    <rect x="591" y="110" width="18" height="13" fill="#F2A33A" fill-opacity="0.15" rx="2"/>
+    <rect x="619" y="110" width="18" height="13" fill="#F2A33A" fill-opacity="0.1" rx="2" style="animation:blink 3s ease 1s infinite;"/>
+    <!-- Chimney -->
+    <rect x="650" y="25" width="12" height="47" fill="#0B1524" stroke="#F2A33A" stroke-opacity="0.2" stroke-width="1"/>
+    <!-- Smoke -->
+    <circle cx="656" cy="18" r="5" fill="#A9B4C4" fill-opacity="0.12" style="animation:dataFlow 3s ease infinite;"/>
+    <circle cx="660" cy="9" r="4" fill="#A9B4C4" fill-opacity="0.08" style="animation:dataFlow 3s ease 1s infinite;"/>
+    <circle cx="652" cy="3" r="3" fill="#A9B4C4" fill-opacity="0.06" style="animation:dataFlow 3s ease 1.8s infinite;"/>
+    <!-- Scan line on building -->
+    <rect x="520" y="70" width="160" height="2" fill="#F2A33A" fill-opacity="0.4" style="animation:scanLine 4s linear infinite;"/>
+    <!-- Robot arm -->
+    <g transform="translate(470,130)" style="transform-origin:0 20px;animation:robotArm 3.5s ease-in-out infinite;">
+      <line x1="0" y1="20" x2="0" y2="-25" stroke="#F2A33A" stroke-width="4" stroke-linecap="round" stroke-opacity="0.8"/>
+      <line x1="0" y1="-25" x2="28" y2="-40" stroke="#F2A33A" stroke-width="3" stroke-linecap="round" stroke-opacity="0.7"/>
+      <circle cx="28" cy="-40" r="5" fill="none" stroke="#F2A33A" stroke-width="2" stroke-opacity="0.8"/>
+      <circle cx="28" cy="-40" r="2" fill="#F2A33A" filter="url(#glow1)" style="animation:spark 1.5s ease infinite;"/>
+    </g>
+    <rect x="460" y="149" width="20" height="12" fill="#0B1524" stroke="#F2A33A" stroke-opacity="0.3" stroke-width="1" rx="2"/>
+    <!-- Conveyor belt -->
+    <rect x="320" y="149" width="120" height="12" fill="#0B1524" stroke="#F2A33A" stroke-opacity="0.2" stroke-width="1" rx="2"/>
+    <g style="animation:conveyor 1.8s linear infinite;">
+      <line x1="325" y1="155" x2="338" y2="155" stroke="#F2A33A" stroke-opacity="0.25" stroke-width="1.5"/>
+      <line x1="350" y1="155" x2="363" y2="155" stroke="#F2A33A" stroke-opacity="0.25" stroke-width="1.5"/>
+      <line x1="375" y1="155" x2="388" y2="155" stroke="#F2A33A" stroke-opacity="0.25" stroke-width="1.5"/>
+      <line x1="400" y1="155" x2="413" y2="155" stroke="#F2A33A" stroke-opacity="0.25" stroke-width="1.5"/>
+      <line x1="425" y1="155" x2="438" y2="155" stroke="#F2A33A" stroke-opacity="0.25" stroke-width="1.5"/>
+    </g>
+    <!-- Product boxes -->
+    <rect x="332" y="138" width="14" height="13" fill="#F2A33A" fill-opacity="0.25" rx="1" stroke="#F2A33A" stroke-opacity="0.5" stroke-width="1"/>
+    <rect x="372" y="138" width="14" height="13" fill="#A9B4C4" fill-opacity="0.3" rx="1" stroke="#A9B4C4" stroke-opacity="0.5" stroke-width="1"/>
+    <rect x="412" y="138" width="14" height="13" fill="#F2A33A" fill-opacity="0.15" rx="1" stroke="#F2A33A" stroke-opacity="0.3" stroke-width="1"/>
+    <!-- LEFT side: AI network nodes -->
+    <circle cx="80" cy="90" r="5" fill="#F2A33A" fill-opacity="0.7" filter="url(#glow1)" style="animation:pulse2 2s ease infinite;"/>
+    <circle cx="150" cy="120" r="4" fill="#F2A33A" fill-opacity="0.5" style="animation:pulse2 2s ease 0.5s infinite;"/>
+    <circle cx="60" cy="140" r="3" fill="#A9B4C4" fill-opacity="0.6" style="animation:pulse2 2s ease 1s infinite;"/>
+    <circle cx="200" cy="80" r="3" fill="#F2A33A" fill-opacity="0.4" style="animation:pulse2 2s ease 0.3s infinite;"/>
+    <circle cx="120" cy="55" r="3" fill="#A9B4C4" fill-opacity="0.5" style="animation:pulse2 2s ease 0.8s infinite;"/>
+    <circle cx="250" cy="110" r="3" fill="#F2A33A" fill-opacity="0.4" style="animation:pulse2 2s ease 1.3s infinite;"/>
+    <!-- Network lines -->
+    <line x1="80" y1="90" x2="150" y2="120" stroke="#F2A33A" stroke-opacity="0.12" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="80" y1="90" x2="60" y2="140" stroke="#A9B4C4" stroke-opacity="0.15" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="80" y1="90" x2="200" y2="80" stroke="#F2A33A" stroke-opacity="0.1" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="80" y1="90" x2="120" y2="55" stroke="#A9B4C4" stroke-opacity="0.12" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="150" y1="120" x2="200" y2="80" stroke="#F2A33A" stroke-opacity="0.1" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="200" y1="80" x2="250" y2="110" stroke="#F2A33A" stroke-opacity="0.1" stroke-width="1" stroke-dasharray="4,4"/>
+    <!-- Floating data packets -->
+    <rect x="100" y="100" width="7" height="4" rx="1" fill="#F2A33A" fill-opacity="0.6" style="animation:dataFlow 2.2s ease infinite;"/>
+    <rect x="170" y="88" width="6" height="4" rx="1" fill="#A9B4C4" fill-opacity="0.5" style="animation:dataFlow 2.8s ease 0.7s infinite;"/>
+    <rect x="220" y="95" width="7" height="4" rx="1" fill="#F2A33A" fill-opacity="0.4" style="animation:dataFlow 2s ease 1.4s infinite;"/>
+    <!-- Floor glow -->
+    <rect x="0" y="170" width="800" height="70" fill="url(#floorGrad)"/>
+  </svg>
+
+  <!-- Stats top left -->
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-val">4</div><div class="hero-stat-label">DIMENSIONS</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">32</div><div class="hero-stat-label">QUESTIONS</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">AI</div><div class="hero-stat-label">POWERED</div></div>
+  </div>
+
+  <!-- Content bottom -->
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <div class="hero-eyebrow-text">A project by RK</div>
+    </div>
+    <h1 class="hero-title">Industrial <span>AI Index</span></h1>
+    <div class="hero-tagline">Where does your manufacturing organisation stand on AI?</div>
+  </div>
+</div>
+</div>
+
+<div class="wrap" id="app">
+  <!-- Dynamic content renders here -->
+  <div id="content"></div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">Industrial <span>AI</span> Index</div>
+        <div class="footer-desc">Built by Radhakrishna Kamaraju. Your answers are sent to Anthropic's Claude API to write your report. This site does not store them.</div>
+      </div>
+      <div class="footer-links">
+        <a href="https://radhakrishnakamaraju.com" class="footer-link">radhakrishnakamaraju.com</a>
+        <a href="https://www.linkedin.com/in/radhakrishna-kamaraju/" rel="noopener" class="footer-link">LinkedIn</a>
+        <a href="https://github.com/radhakrishna-kamaraju" rel="noopener" class="footer-link">GitHub</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 Radhakrishna Kamaraju</div>
+      <div class="footer-powered">Reports written by <span>Claude · Anthropic</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+<script>
+// ─── DATA (question bank is in questions.js) ─────────────────────────────────
+const MATURITY_LEVELS=[
+  {min:0,max:25,label:"Foundational",color:"#A9B4C4",description:"AI pilots exist in isolation. Experimenting but not yet connected across the enterprise."},
+  {min:26,max:45,label:"Developing",color:"#F28B82",description:"Early integration efforts underway. Pockets of AI value emerging but no enterprise strategy."},
+  {min:46,max:65,label:"Scaling",color:"#7FA8FF",description:"AI embedded in key workflows. Transitioning from pilots to production at scale."},
+  {min:66,max:80,label:"Advanced",color:"#5EC4B6",description:"Enterprise-wide AI with measurable impact. Human-agent collaboration is becoming the norm."},
+  {min:81,max:100,label:"Frontier",color:"#F2A33A",description:"Fully agentic, connected, and governed. AI drives autonomous outcomes at enterprise scale."},
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let state={
+  phase:"intro", mode:null, industry:"", companySize:"",
+  answers:{}, currentIdx:0, aiReport:"", flat:[],
+  aiUsed:false, pdfLoading:false,
+  loadingDots:0, loadingTimer:null
+};
+
+function getMaturity(s){return MATURITY_LEVELS.find(l=>s>=l.min&&s<=l.max)||MATURITY_LEVELS[0];}
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function buildFlat(mode){
+  const flat=[];
+  AREAS.forEach((area,ai)=>{
+    const qs=mode==="quick"?area.questions.quick:area.questions.detailed;
+    qs.forEach((q,qi)=>flat.push({...q,areaId:area.id,areaIdx:ai,qIdx:qi,areaTitle:area.title,areaColor:area.color,areaIcon:area.icon}));
+  });
+  return flat;
+}
+function getScore(ans,flat){
+  const total=flat.reduce((s,q)=>s+(ans[q.id]||0),0);
+  const max=flat.length*5;
+  return max>0?Math.round((total/max)*100):0;
+}
+function getAreaScore(areaId,ans,flat){
+  const qs=flat.filter(q=>q.areaId===areaId);
+  const total=qs.reduce((s,q)=>s+(ans[q.id]||0),0);
+  const max=qs.length*5;
+  return max>0?Math.round((total/max)*100):0;
+}
+function getLayerScore(areaId,layer,ans,flat){
+  const qs=flat.filter(q=>q.areaId===areaId&&q.layer===layer);
+  if(!qs.length)return 0;
+  return Math.round(qs.reduce((s,q)=>s+(ans[q.id]||0),0)/qs.length*20);
+}
+
+// ─── FALLBACK REPORT ─────────────────────────────────────────────────────────
+function buildFallbackReport(ans,flat,score,mat,areaScores){
+  const sorted=[...areaScores].sort((a,b)=>b.score-a.score);
+  const strongest=sorted[0],weakest=sorted[sorted.length-1],second=sorted[sorted.length-2];
+  const layerScores=state.mode==="detailed"?AREAS.map(a=>{
+    return{areaId:a.id,areaTitle:a.title,
+      Capability:getLayerScore(a.id,"Capability",ans,flat),
+      Impact:getLayerScore(a.id,"Impact",ans,flat),
+      Readiness:getLayerScore(a.id,"Readiness",ans,flat)};
+  }):[];
+  const capImpactGap=layerScores.find(l=>l.Capability-l.Impact>20);
+  const readinessWeak=layerScores.find(l=>l.Readiness<40);
+  const headlines={Foundational:"Your organization is at the starting line — AI experimentation exists but enterprise-wide transformation hasn't begun yet.",Developing:"You have early proof points in AI but risk stalling without a connected enterprise strategy to scale them.",Scaling:"You're mid-transformation — the next 90 days will determine whether AI becomes a genuine competitive edge or another stalled initiative.",Advanced:"Your AI foundations are strong; the priority now is closing the gap between capability and measurable business impact.",Frontier:"You're operating at the industrial AI frontier — focus should shift from building to compounding your lead."};
+  const bottomLines={Foundational:"Organizations at the Foundational stage that don't accelerate in the next 12 months risk falling 3-5 years behind Frontier competitors already scaling agentic operations. The window to close this gap cost-effectively is now.",Developing:"The difference between Developing and Scaling is not budget — it's decision velocity. Organizations that connect AI pilots to a unified strategy in the next 12 months will see compounding returns; those that don't will repeat pilots for 3 more years.",Scaling:"At "+score+"%, you are close enough to Advanced that focused execution on your two weakest areas could shift your competitive position materially within 12 months. Stalling here is the most expensive outcome.",Advanced:"At "+score+"% you are ahead of most peers — but Advanced organizations that fail to close the Capability-to-Impact gap within 12 months typically see AI fatigue set in and struggle to secure the next round of investment.",Frontier:"Your "+score+"% score places you among the top tier of industrial AI adopters — the strategic priority now is governance and trust, ensuring your agentic systems remain observable, auditable, and aligned as they scale."};
+  const lines=[
+    "**HEADLINE INSIGHT**",headlines[mat.label]||headlines.Developing,"",
+    "**STRENGTHS**",
+    "- "+(strongest.score>=60?strongest.title+" is your most mature dimension at "+strongest.score+"% — a genuine competitive strength to build from.":"Despite an overall "+mat.label+" rating, your "+strongest.title+" work at "+strongest.score+"% shows meaningful early progress that can anchor broader transformation."),
+    "- "+(score>=40?"Breadth of coverage across all four dimensions ("+areaScores.map(a=>a.score+"%").join(", ")+") suggests a balanced approach rather than over-indexing on a single area.":"Completing this assessment demonstrates a willingness to benchmark honestly — organizations that measure their gaps close them faster than those that don't."),"",
+    "**CRITICAL GAPS**",
+    "- "+weakest.title+" is your most critical gap at "+weakest.score+"% — this is where AI value leakage is highest and where intervention will have the greatest multiplier effect.",
+    "- "+second.title+" at "+second.score+"% represents a structural drag on cross-functional AI outcomes — addressing it in parallel is essential.",
+    ...(capImpactGap?["- In "+capImpactGap.areaTitle+", Capability ("+capImpactGap.Capability+"%) significantly outpaces Impact ("+capImpactGap.Impact+"%) — you are building AI tools that aren't yet delivering measured business results."]:readinessWeak?["- Readiness in "+readinessWeak.areaTitle+" ("+readinessWeak.Readiness+"%) is below the threshold needed to scale — data infrastructure and talent gaps will become blockers within 6 months."]:[""]),"",
+    "**TOP 3 PRIORITY ACTIONS**",
+    "1. Conduct a focused sprint on "+weakest.title+": map the specific data and integration gaps, assign an owner, and set a 60-day milestone with measurable outcomes.",
+    "2. Establish an AI scorecard for "+second.title+" — define 2-3 KPIs that will demonstrate ROI to leadership within the next quarter.",
+    "3. Identify one high-visibility quick win in "+strongest.title+" that can be showcased internally within 30 days to build momentum and secure broader sponsorship.","",
+    "**THE BOTTOM LINE**",bottomLines[mat.label]||bottomLines.Developing,"",
+    "This report was generated from your scores without AI."
+  ];
+  return lines.join("\n");
+}
+
+// ─── RENDER ENGINE ────────────────────────────────────────────────────────────
+function render(){
+  const el=document.getElementById("content");
+  if(!el)return;
+  const {phase}=state;
+  if(phase==="intro")el.innerHTML=renderIntro();
+  else if(phase==="assessment")el.innerHTML=renderAssessment();
+  else if(phase==="loading")el.innerHTML=renderLoading();
+  else if(phase==="results")el.innerHTML=renderResults();
+  attachEvents();
+}
+
+function renderIntro(){
+  const qCount=state.mode==="quick"?3:state.mode==="detailed"?8:"?";
+  return`<div class="fade-in">
+  <div class="card"><p style="color:#C9D2DE;font-size:13px;line-height:1.75;">Evaluate your organization's AI maturity across four critical dimensions — <strong style="color:#F4F1EA;">Product Lifecycle, Factory Operations, Human-Agent Collaboration</strong> and <strong style="color:#F4F1EA;">Agentic Supply Chain</strong>. Choose your assessment depth below. Your answers are sent to Anthropic's Claude API to write your report; this site does not store them.</p></div>
+  <div class="mode-grid">
+    ${["quick","detailed"].map(m=>`
+    <div class="mode-card${state.mode===m?" selected":""}" onclick="selectMode('${m}')">
+      <div class="mode-card-header">
+        <div class="mode-card-title">${m==="quick"?"High-Level":"Detailed"}</div>
+        <div class="mode-badge">${m==="quick"?"4–6 min":"8–12 min"}</div>
+      </div>
+      <div class="mode-qs">${m==="quick"?"12 questions":"32 questions"}</div>
+      <div class="mode-desc">${m==="quick"?"Executive diagnostic. 3 questions per area. Fast read on where you stand across all four dimensions.":"Deep capability, impact & readiness audit. 8 questions per area across three structured layers."}</div>
+      <div class="mode-who">${m==="quick"?"Best for: First-time assessment, leadership briefings, quick benchmarking.":"Best for: Strategic planning, AI roadmap development, board reporting."}</div>
+    </div>`).join("")}
+  </div>
+  <div class="area-grid">
+    ${AREAS.map(a=>`<div class="area-mini" style="border:1px solid ${a.color}18;">
+      <div class="area-mini-icon">${a.icon}</div>
+      <div><div class="area-mini-title" style="color:${a.color};">${a.title}</div><div class="area-mini-qs">${qCount} questions</div></div>
+    </div>`).join("")}
+  </div>
+  <div class="meta-grid">
+    <div class="field"><label>Industry Sector</label><input id="industryInput" value="${esc(state.industry)}" placeholder="e.g. Automotive, Aerospace…" oninput="state.industry=this.value"/></div>
+    <div class="field"><label>Company Size</label>
+      <select id="sizeInput" onchange="state.companySize=this.value">
+        <option value="" ${!state.companySize?"selected":""}>Select size…</option>
+        ${["Under 500 employees","500–5,000 employees","5,000–25,000 employees","25,000+ employees"].map(o=>`<option value="${o}" ${state.companySize===o?"selected":""}>${o}</option>`).join("")}
+      </select>
+    </div>
+  </div>
+  <button class="btn-primary" ${!state.mode?"disabled":""} onclick="startAssessment()">${state.mode?"Begin "+(state.mode==="quick"?"High-Level":"Detailed")+" Assessment →":"Select an assessment mode above"}</button>
+</div>`;
+}
+
+function renderAssessment(){
+  const {flat,answers,currentIdx,mode}=state;
+  const current=flat[currentIdx];
+  if(!current)return"";
+  const totalQ=flat.length;
+  const globalPct=Math.round(((currentIdx+1)/totalQ)*100);
+  const currentAnswered=!!answers[current.id];
+  const answeredCount=flat.filter(q=>answers[q.id]).length;
+
+  const areaProgress=AREAS.map(a=>{
+    const qs=flat.filter(q=>q.areaId===a.id);
+    const done=qs.filter(q=>answers[q.id]).length;
+    return{...a,done,total:qs.length,pct:qs.length?Math.round(done/qs.length*100):0};
+  });
+
+  return`<div class="fade-in">
+  <div class="area-progress">
+    ${areaProgress.map(a=>{
+      const isActive=current.areaId===a.id;
+      return`<div class="area-prog-item">
+        <div class="area-prog-top">
+          <span class="area-prog-icon" style="color:${isActive?a.color:a.done===a.total&&a.total>0?a.color+"88":"#7F8CA0"};">${a.icon}</span>
+          <span class="area-prog-count" style="color:${isActive?a.color:"#7F8CA0"};">${a.done}/${a.total}</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" style="width:${a.pct}%;background:${a.color};opacity:${isActive?1:0.5};"></div></div>
+      </div>`;
+    }).join("")}
+  </div>
+  <div class="q-meta">
+    <div class="q-badge" style="background:${current.areaColor}12;border:1px solid ${current.areaColor}30;">
+      <span class="q-badge-icon">${current.areaIcon}</span>
+      <span class="q-badge-title" style="color:${current.areaColor};">${current.areaTitle}</span>
+      <span class="q-badge-layer" style="color:${current.areaColor}70;background:${current.areaColor}15;">${current.layer}</span>
+    </div>
+    <span class="q-num">${currentIdx+1} / ${totalQ}</span>
+  </div>
+  <div class="q-progress"><div class="q-progress-fill" style="width:${globalPct}%;background:${current.areaColor};"></div></div>
+  <div class="q-text">${current.text}</div>
+  <div class="options">
+    ${current.options.map(opt=>`
+    <button class="option-btn${answers[current.id]===opt.v?" selected":""}"
+      style="${answers[current.id]===opt.v?"background:"+current.areaColor+"18;border-color:"+current.areaColor+";color:#fff;":""}"
+      onclick="handleAnswer('${current.id}',${opt.v})">
+      <span class="option-num" style="color:${current.areaColor};">0${opt.v}</span>
+      ${opt.l}
+    </button>`).join("")}
+  </div>
+  <div class="btn-row">
+    <button class="btn-ghost" style="flex:1;${currentIdx===0?"color:#5E6E87;border-color:rgba(255,255,255,0.04);cursor:not-allowed;":""}" onclick="goBack()" ${currentIdx===0?"disabled":""}>← Back</button>
+    <button class="btn-primary" style="flex:2;${!currentAnswered?"background:rgba(255,255,255,0.04);color:#5E6E87;cursor:not-allowed;":""}" onclick="goForward()" ${!currentAnswered?"disabled":""}>${currentIdx===totalQ-1?"Submit & Generate Report →":"Next →"}</button>
+  </div>
+  <div class="answered-count">${answeredCount} of ${totalQ} answered</div>
+</div>`;
+}
+
+function renderLoading(){
+  return`<div class="loading fade-in">
+  <div class="loading-dots">
+    ${AREAS.map((a,i)=>`<div class="loading-dot" style="background:${a.color};animation:pulse 1.2s ease ${i*0.2}s infinite;"></div>`).join("")}
+  </div>
+  <div class="loading-text" id="loadingText">ANALYZING ${state.flat.length} RESPONSES</div>
+  <div class="loading-sub">Generating your ${state.mode==="detailed"?"comprehensive":"strategic"} AI report</div>
+</div>`;
+}
+
+function renderResults(){
+  const{flat,answers,mode,pdfLoading}=state;
+  const score=getScore(answers,flat);
+  const mat=getMaturity(score);
+  const areaScores=AREAS.map(a=>({id:a.id,title:a.title,color:a.color,icon:a.icon,score:getAreaScore(a.id,answers,flat)}));
+
+  return`<div class="fade-in">
+  <div class="mode-pill">
+    <span style="color:${mode==="detailed"?"#7FA8FF":"#F2A33A"};background:${mode==="detailed"?"rgba(127,168,255,0.1)":"rgba(242,163,58,0.1)"};border:1px solid ${mode==="detailed"?"rgba(127,168,255,0.3)":"rgba(242,163,58,0.3)"};">
+      ${mode==="detailed"?"DETAILED ASSESSMENT · 32 QUESTIONS":"HIGH-LEVEL ASSESSMENT · 12 QUESTIONS"}
+    </span>
+  </div>
+
+  <div class="score-hero" style="background:linear-gradient(135deg,${mat.color}10,transparent);border:1px solid ${mat.color}30;">
+    <div class="score-label">Overall Maturity Score</div>
+    <div class="score-big" style="color:${mat.color};">${score}<span style="font-size:26px;">%</span></div>
+    <div class="score-level">${mat.label.toUpperCase()}</div>
+    <div class="score-desc">${mat.description}</div>
+  </div>
+
+  <div class="areas-grid">
+    ${areaScores.map(a=>{
+      const layers=["Capability","Impact","Readiness"];
+      const layerHTML=mode==="detailed"?`<div class="layer-scores">${layers.map(layer=>{
+        const ls=getLayerScore(a.id,layer,answers,flat);
+        const lc=ls>=60?"#5EC4B6":ls>=40?"#F2A33A":"#F28B82";
+        return`<div class="layer-score-item"><div class="layer-score-label">${layer.slice(0,3).toUpperCase()}</div><div class="layer-score-val" style="color:${lc};">${ls}%</div></div>`;
+      }).join("")}</div>`:"";
+      return`<div class="area-result">
+        <div class="area-result-header">
+          <span class="area-result-name" style="color:${a.color};">${a.icon} ${a.title.split(" ")[0]}</span>
+          <span class="area-result-score" style="color:${a.color};">${a.score}%</span>
+        </div>
+        <div class="area-bar-track"><div class="area-bar-fill" style="width:${a.score}%;background:${a.color};"></div></div>
+        ${layerHTML}
+      </div>`;
+    }).join("")}
+  </div>
+
+  <div class="report-box">
+    <div class="report-header">
+      <div class="report-dot pulse"></div>
+      <span class="report-tag">${state.aiUsed?"AI-GENERATED STRATEGIC ASSESSMENT":"STRATEGIC ASSESSMENT"}</span>
+    </div>
+    <div id="reportContent">${formatReport(state.aiReport)}</div>
+  </div>
+
+  <div class="email-section">
+    <div class="email-section-label">Download PDF report</div>
+    <button class="btn-pdf" id="pdfBtn" onclick="triggerPDF()" ${pdfLoading?"disabled":""}>
+      ${pdfLoading?"Preparing PDF…":"Download PDF report"}
+    </button>
+  </div>
+
+  <div class="scale-box">
+    <div class="scale-label">MATURITY SCALE</div>
+    <div class="scale-track">
+      ${MATURITY_LEVELS.map(l=>`<div class="scale-item">
+        <div class="scale-bar" style="background:${mat.label===l.label?l.color:l.color+"30"};"></div>
+        <div class="scale-name" style="color:${mat.label===l.label?l.color:"#7F8CA0"};">${l.label}</div>
+      </div>`).join("")}
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-ghost" style="flex:1;" onclick="resetAll()">↺ Retake</button>
+    <button class="btn-ghost" style="flex:2;" onclick="reviewAnswers()">← Review My Answers</button>
+  </div>
+</div>`;
+}
+
+function formatReport(text){
+  if(!text)return"";
+  return esc(text).split("\n").map(line=>{
+    if(line.match(/^\*\*(.+)\*\*$/))return`<div class="report-section">${line.replace(/\*\*/g,"")}</div>`;
+    if(line.startsWith("- "))return`<div class="report-bullet"><span class="report-bullet-arrow">→</span><span>${line.slice(2)}</span></div>`;
+    if(line.match(/^\d+\./))return`<div class="report-numbered"><span class="report-num">${line.match(/^\d+/)[0]}.</span><span>${line.replace(/^\d+\.\s*/,"")}</span></div>`;
+    if(!line.trim())return`<div style="height:3px;"></div>`;
+    return`<div class="report-text">${line}</div>`;
+  }).join("");
+}
+
+// ─── EVENTS ───────────────────────────────────────────────────────────────────
+function attachEvents(){}
+
+function selectMode(m){
+  state.mode=m;
+  render();
+}
+
+function startAssessment(){
+  if(!state.mode)return;
+  state.flat=buildFlat(state.mode);
+  state.answers={};
+  state.currentIdx=0;
+  state.phase="assessment";
+  render();
+}
+
+function handleAnswer(qId,value){
+  state.answers[qId]=value;
+  render();
+  if(state.currentIdx<state.flat.length-1){
+    setTimeout(()=>{state.currentIdx++;render();},280);
+  }
+}
+
+function goBack(){
+  if(state.currentIdx>0){state.currentIdx--;render();}
+}
+
+function goForward(){
+  const cur=state.flat[state.currentIdx];
+  if(!cur||!state.answers[cur.id])return;
+  if(state.currentIdx<state.flat.length-1){
+    state.currentIdx++;render();
+  } else {
+    submitAssessment();
+  }
+}
+
+function submitAssessment(){
+  state.phase="loading";
+  render();
+  startLoadingAnimation();
+  generateReport();
+}
+
+function reviewAnswers(){
+  state.phase="assessment";
+  state.currentIdx=0;
+  render();
+}
+
+function resetAll(){
+  state={...state,phase:"intro",mode:null,answers:{},currentIdx:0,aiReport:"",flat:[],aiUsed:false,pdfLoading:false};
+  render();
+}
+
+function triggerPDF(){
+  state.pdfLoading=true;
+  render();
+  generatePDF();
+}
+
+// ─── LOADING ANIMATION ───────────────────────────────────────────────────────
+function startLoadingAnimation(){
+  if(state.loadingTimer)clearInterval(state.loadingTimer);
+  let d=0;
+  state.loadingTimer=setInterval(()=>{
+    d=(d+1)%4;
+    const el=document.getElementById("loadingText");
+    if(el)el.textContent="ANALYZING "+state.flat.length+" RESPONSES"+".".repeat(d);
+  },400);
+}
+
+// ─── API + FALLBACK ───────────────────────────────────────────────────────────
+async function generateReport(){
+  const{flat,answers,mode,industry,companySize}=state;
+  const score=getScore(answers,flat);
+  const mat=getMaturity(score);
+  const areaScores=AREAS.map(a=>({id:a.id,title:a.title,score:getAreaScore(a.id,answers,flat)}));
+
+  let text="";
+  try{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),30000);
+    const r=await fetch("/api/report",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({mode,industry,companySize,answers}),
+      signal:controller.signal
+    });
+    clearTimeout(timeout);
+    if(r.ok){const d=await r.json();text=typeof d.text==="string"?d.text:"";}
+  }catch(e){}
+  state.aiUsed=text.length>50;
+  state.aiReport=state.aiUsed?text:buildFallbackReport(answers,flat,score,mat,areaScores);
+  if(state.loadingTimer){clearInterval(state.loadingTimer);state.loadingTimer=null;}
+  state.phase="results";
+  render();
+}
+
+// ─── PDF ─────────────────────────────────────────────────────────────────────
+function generatePDF(){
+  const{industry,companySize,mode,answers,flat,aiReport}=state;
+  const score=getScore(answers,flat);
+  const level=getMaturity(score);
+  const now=new Date().toLocaleDateString("en-GB",{year:"numeric",month:"long",day:"numeric"});
+
+  const script=document.createElement("script");
+  script.src="vendor/jspdf.umd.min.js";
+  script.onload=()=>{
+    const{jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+    const W=210,H=297;
+    const hex2rgb=h=>{const c=h.replace("#","");return[parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)];};
+    const[lr,lg,lb]=hex2rgb(level.color);
+
+    doc.setFillColor(15,27,45);doc.rect(0,0,W,70,"F");
+    doc.setFillColor(242,163,58);doc.rect(0,0,4,70,"F");
+    doc.setFontSize(8);doc.setTextColor(242,163,58);doc.text("INDUSTRIAL AI MATURITY ASSESSMENT · "+(mode||"").toUpperCase()+" MODE",12,16);
+    doc.setFontSize(22);doc.setTextColor(255,255,255);doc.setFont(undefined,"bold");doc.text("Industrial AI Index",12,30);
+    doc.setFontSize(10);doc.setFont(undefined,"normal");doc.setTextColor(100,116,139);doc.text("AI readiness assessment report",12,38);
+    doc.setFontSize(8);doc.setTextColor(71,85,105);
+    doc.text("INDUSTRY",12,50);doc.text("DATE",160,50);
+    doc.setTextColor(226,232,240);
+    doc.text((industry||"Manufacturing").substring(0,60),12,56);doc.text(now,160,56);
+    doc.setTextColor(71,85,105);doc.text("ORGANIZATION SIZE",12,63);
+    doc.setTextColor(226,232,240);doc.text(companySize||"Not specified",12,68);
+
+    doc.setFillColor(23,40,63);doc.rect(0,70,W,28,"F");
+    doc.setFontSize(8);doc.setTextColor(100,116,139);doc.text("OVERALL MATURITY SCORE",12,80);
+    doc.setFontSize(30);doc.setFont(undefined,"bold");doc.setTextColor(lr,lg,lb);doc.text(score+"%",12,93);
+    doc.setFontSize(14);doc.setTextColor(lr,lg,lb);doc.text(level.label.toUpperCase(),52,82);
+    doc.setFontSize(9);doc.setFont(undefined,"normal");doc.setTextColor(148,163,184);
+    doc.text(doc.splitTextToSize(level.description,120),52,88);
+
+    let y=110;
+    doc.setFontSize(8);doc.setFont(undefined,"normal");doc.setTextColor(242,163,58);doc.text("AREA BREAKDOWN",12,y);y+=3;
+    doc.setDrawColor(242,163,58);doc.setLineWidth(0.3);doc.line(12,y,W-12,y);y+=6;
+    AREAS.forEach((area,i)=>{
+      const as=getAreaScore(area.id,answers,flat);
+      const x=i%2===0?12:W/2+4;if(i%2===0&&i>0)y+=18;
+      const[ar,ag,ab]=hex2rgb(area.color);
+      doc.setFontSize(8);doc.setFont(undefined,"normal");doc.setTextColor(ar,ag,ab);doc.text(area.title,x,y);
+      doc.setFontSize(11);doc.setFont(undefined,"bold");doc.setTextColor(ar,ag,ab);doc.text(as+"%",x+78,y);
+      doc.setFillColor(30,41,59);doc.rect(x,y+2,80,3,"F");
+      doc.setFillColor(ar,ag,ab);doc.rect(x,y+2,80*as/100,3,"F");
+    });
+    y+=22;
+
+    doc.setFontSize(8);doc.setFont(undefined,"normal");doc.setTextColor(242,163,58);doc.text("MATURITY SCALE",12,y);y+=3;
+    doc.line(12,y,W-12,y);y+=5;
+    const sw=(W-24)/5;
+    MATURITY_LEVELS.forEach((l,i)=>{
+      const sx=12+i*sw;const[r,g,b]=hex2rgb(l.color);const active=level.label===l.label;
+      doc.setFillColor(active?r:Math.floor(r*.25),active?g:Math.floor(g*.25),active?b:Math.floor(b*.25));
+      doc.rect(sx,y,sw-2,3,"F");
+      doc.setFontSize(6);doc.setFont(undefined,active?"bold":"normal");doc.setTextColor(active?r:80,active?g:80,active?b:80);
+      doc.text(l.label,sx+(sw-2)/2,y+7,{align:"center"});
+    });
+    y+=14;
+
+    doc.setFontSize(8);doc.setFont(undefined,"normal");doc.setTextColor(242,163,58);doc.text("STRATEGIC ASSESSMENT",12,y);y+=3;
+    doc.line(12,y,W-12,y);y+=7;
+    aiReport.split("\n").forEach(line=>{
+      if(y>H-16){doc.addPage();y=18;}
+      if(line.match(/^\*\*(.+)\*\*$/)){
+        y+=2;doc.setFontSize(8);doc.setFont(undefined,"bold");doc.setTextColor(242,163,58);
+        doc.text(line.replace(/\*\*/g,""),12,y);y+=5;
+      }else if(line.startsWith("- ")){
+        doc.setFontSize(9);doc.setFont(undefined,"normal");doc.setTextColor(100,116,139);doc.text("-",14,y);
+        doc.setTextColor(148,163,184);const w=doc.splitTextToSize(line.slice(2),W-38);doc.text(w,20,y);y+=w.length*4.5;
+      }else if(line.match(/^\d+\./)){
+        doc.setFontSize(9);doc.setFont(undefined,"normal");doc.setTextColor(242,139,130);doc.text(line.match(/^\d+/)[0]+".",14,y);
+        doc.setTextColor(148,163,184);const w=doc.splitTextToSize(line.replace(/^\d+\.\s*/,""),W-38);doc.text(w,20,y);y+=w.length*4.5;
+      }else if(line.trim()){
+        doc.setFontSize(9);doc.setFont(undefined,"normal");doc.setTextColor(100,116,139);
+        const w=doc.splitTextToSize(line,W-24);doc.text(w,12,y);y+=w.length*4.5;
+      }else{y+=2;}
+    });
+
+    doc.setFillColor(15,27,45);doc.rect(0,H-10,W,10,"F");
+    doc.setFontSize(7);doc.setTextColor(242,163,58);doc.text("INDUSTRIAL AI INDEX",12,H-4);
+    doc.setTextColor(71,85,105);doc.text(now,W-12,H-4,{align:"right"});
+
+    doc.save("industrial-ai-index-report.pdf");
+    state.pdfLoading=false;render();
+  };
+  script.onerror=()=>{state.pdfLoading=false;render();const b=document.getElementById("pdfBtn");if(b)b.textContent="PDF could not be prepared. Try again";};
+  document.head.appendChild(script);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+render();
+
+// Splash screen
+window.addEventListener("load",()=>{
+  setTimeout(()=>{
+    const s=document.getElementById("splash");
+    if(s){s.classList.add("hidden");setTimeout(()=>s.style.display="none",600);}
+  },1400);
+});
+
+</script>
+</body>
+</html>

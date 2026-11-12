@@ -1,0 +1,18 @@
+services:
+  industrial-ai-index:
+    build: .
+    container_name: industrial-ai-index
+    restart: unless-stopped
+    # Holds ANTHROPIC_API_KEY. Lives only on the server, never in git.
+    env_file: .env
+    # No published ports: Traefik on the VPS routes the subdomain here.
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.iai.loadbalancer.server.port=3000
+      - traefik.http.routers.iai.rule=Host(`industrial-ai.radhakrishnakamaraju.com`)
+      - traefik.http.routers.iai.entrypoints=websecure
+      - traefik.http.routers.iai.tls.certresolver=letsencrypt
+      - traefik.http.routers.iai-http.rule=Host(`industrial-ai.radhakrishnakamaraju.com`)
+      - traefik.http.routers.iai-http.entrypoints=web
+      - traefik.http.routers.iai-http.middlewares=iai-https
+      - traefik.http.middlewares.iai-https.redirectscheme.scheme=https
