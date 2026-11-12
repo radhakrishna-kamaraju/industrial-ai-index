@@ -9,6 +9,7 @@ const path = require('node:path');
 
 const PORT = Number(process.env.PORT || 3000);
 const API_KEY = process.env.ANTHROPIC_API_KEY || '';
+const WORKSPACE_ID = (process.env.ANTHROPIC_WORKSPACE_ID || '').trim();
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
 const PER_IP_PER_HOUR = Number(process.env.RATE_PER_IP_PER_HOUR || 5);
 const DAILY_CAP = Number(process.env.DAILY_CAP || 200);
@@ -195,7 +196,7 @@ async function handleReport(req, res) {
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      headers: { 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', ...(WORKSPACE_ID ? { 'anthropic-workspace-id': WORKSPACE_ID } : {}) },
       body: JSON.stringify({ model: MODEL, max_tokens: 1200, messages: [{ role: 'user', content: buildPrompt(parsed) }] }),
       signal: AbortSignal.timeout(25_000),
     });
