@@ -190,7 +190,8 @@ async function handleReport(req, res) {
   if (!parsed) return sendJson(res, 400, { error: 'invalid_request' });
   if (!API_KEY) return sendJson(res, 503, { error: 'not_configured' });
 
-  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+  // The proxy in front appends the real client address last; ignore anything a client prepends.
+  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',').pop().trim();
   if (!allow(ip)) return sendJson(res, 429, { error: 'rate_limited' });
 
   try {
