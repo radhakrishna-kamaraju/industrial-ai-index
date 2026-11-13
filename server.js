@@ -11,8 +11,8 @@ const PORT = Number(process.env.PORT || 3000);
 const API_KEY = process.env.ANTHROPIC_API_KEY || '';
 const WORKSPACE_ID = (process.env.ANTHROPIC_WORKSPACE_ID || '').trim();
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
-const PER_IP_PER_HOUR = Number(process.env.RATE_PER_IP_PER_HOUR || 5);
-const DAILY_CAP = Number(process.env.DAILY_CAP || 200);
+const PER_IP_PER_HOUR = Number(process.env.RATE_PER_IP_PER_HOUR || 3);
+const DAILY_CAP = Number(process.env.DAILY_CAP || 10);
 const SITE_DIR = path.join(__dirname, 'site');
 
 // ---- question bank (same file the page loads) ----
