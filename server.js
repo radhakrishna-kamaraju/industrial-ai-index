@@ -11,6 +11,8 @@ const PORT = Number(process.env.PORT || 3000);
 const API_KEY = process.env.ANTHROPIC_API_KEY || '';
 const WORKSPACE_ID = (process.env.ANTHROPIC_WORKSPACE_ID || '').trim();
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
+// Only overridden by the tests, which point it at a local stub.
+const API_URL = process.env.ANTHROPIC_API_URL || 'https://api.anthropic.com/v1/messages';
 const PER_IP_PER_HOUR = Number(process.env.RATE_PER_IP_PER_HOUR || 3);
 const DAILY_CAP = Number(process.env.DAILY_CAP || 10);
 const SITE_DIR = path.join(__dirname, 'site');
@@ -35,7 +37,15 @@ function buildFlat(mode) {
   }
   return flat;
 }
-const pct = (qs, ans) => (qs.length ? Math.round((qs.reduce((s, q) => s + ans[q.id], 0) / (qs.length * 5)) * 100) : 0);
+// Each answer is 1-5. The lowest answer is worth 0 and the highest 100, so all-lowest scores 0%.
+const pct = (qs, ans) => (qs.length ? Math.round((qs.reduce((s, q) => s + (ans[q.id] - 1), 0) / (qs.length * 4)) * 100) : 0);
+const levelOf = (score) => MATURITY.find((m) => score <= m.max);
+// "6 points to Advanced", or "top level" at Frontier.
+function nextStep(score) {
+  const i = MATURITY.indexOf(levelOf(score));
+  if (i === MATURITY.length - 1) return 'top level';
+  return `${MATURITY[i].max + 1 - score} points to ${MATURITY[i + 1].label}`;
+}
 
 // Returns a validated request, or null if anything is off.
 function parseRequest(body) {
@@ -62,27 +72,24 @@ function parseRequest(body) {
 
 function buildPrompt({ mode, flat, answers, industry, companySize }) {
   const score = pct(flat, answers);
-  const level = MATURITY.find((m) => score <= m.max).label;
-  const areaLines = AREAS.map((a) => `${a.title}: ${pct(flat.filter((q) => q.areaId === a.id), answers)}%`).join('\n');
+  const areaLines = AREAS.map((a) => {
+    const sc = pct(flat.filter((q) => q.areaId === a.id), answers);
+    return `${a.title}: ${sc}% (${levelOf(sc).label}, ${nextStep(sc)})`;
+  }).join('\n');
   const layers = ['Capability', 'Impact', 'Readiness'];
   const layerBlock =
     mode === 'detailed'
-      ? '\nLayer Breakdown:\n' +
+      ? '\nLayer breakdown:\n' +
         AREAS.map(
           (a) =>
             a.title +
             ':\n' +
-            layers
-              .map((l) => {
-                const qs = flat.filter((q) => q.areaId === a.id && q.layer === l);
-                const avg = qs.length ? Math.round((qs.reduce((s, q) => s + answers[q.id], 0) / qs.length) * 20) : 0;
-                return `  ${l}: ${avg}%`;
-              })
-              .join('\n')
-        ).join('\n\n')
+            layers.map((l) => `  ${l}: ${pct(flat.filter((q) => q.areaId === a.id && q.layer === l), answers)}%`).join('\n')
+        ).join('\n\n') +
+        '\n'
       : '';
   const answerBlock = flat
-    .map((q) => `[${q.areaTitle} | ${q.layer}] ${q.text}\n→ ${q.options.find((o) => o.v === answers[q.id]).l}`)
+    .map((q) => `[${q.areaTitle} | ${q.layer}] ${q.text}\n-> level ${answers[q.id]} of 5: ${q.options.find((o) => o.v === answers[q.id]).l}`)
     .join('\n\n');
 
   return `You are an expert in industrial AI transformation. A manufacturer completed the Industrial AI Index (${
@@ -90,38 +97,56 @@ function buildPrompt({ mode, flat, answers, industry, companySize }) {
   } mode).
 
 Industry: ${industry || 'Manufacturing'} | Size: ${companySize || 'Not specified'}
-Overall Score: ${score}% — ${level}
+Overall score: ${score}% (${levelOf(score).label}, ${nextStep(score)})
 
-Area Scores:
+Scoring: each answer is a level from 1 to 5. Level 1 is worth 0% and level 5 is worth 100%.
+Maturity levels: Foundational 0-25, Developing 26-45, Scaling 46-65, Advanced 66-80, Frontier 81-100.
+
+Area scores:
 ${areaLines}
 ${layerBlock}
-
 Answers:
 ${answerBlock}
 
-Provide a sharp strategic assessment:
+Write a sharp strategic assessment and return it with the write_report tool.
 
-**HEADLINE INSIGHT**
-(1 punchy sentence)
+Rules:
+- Be direct and specific. Refer to the actual scores and answers above.
+- Do not compare this organisation with peers, competitors or industry averages, and do not quote statistics. You only have the answers above.
+- Actions must be things a team could start within 90 days. The third action is a quick win.
+- Plain text only: no markdown, no asterisks, no headings. British English.`;
+}
 
-**STRENGTHS**
-- (strength 1)
-- (strength 2)
+const REPORT_TOOL = {
+  name: 'write_report',
+  description: 'Return the strategic assessment for this manufacturer.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      headline: { type: 'string', description: 'One punchy sentence.' },
+      strengths: { type: 'array', items: { type: 'string' }, description: 'Two strengths, one sentence each.' },
+      gaps: { type: 'array', items: { type: 'string' }, description: 'Two or three critical gaps, one sentence each.' },
+      actions: { type: 'array', items: { type: 'string' }, description: 'Three priority actions for the next 90 days. The third is a quick win.' },
+      bottomLine: { type: 'string', description: 'Two sentences at most.' },
+    },
+    required: ['headline', 'strengths', 'gaps', 'actions', 'bottomLine'],
+  },
+};
 
-**CRITICAL GAPS**
-- (gap 1)
-- (gap 2)
-${mode === 'detailed' ? '- (gap 3 if readiness/impact data reveals a pattern)' : ''}
-
-**TOP 3 PRIORITY ACTIONS**
-1. (90-day action)
-2. (90-day action)
-3. (quick win)
-
-**THE BOTTOM LINE**
-(2 sentences max)
-
-Be direct. Reference actual scores. No generic consulting language.`;
+// The model's output goes to the page and the PDF, so check its shape and size before passing it on.
+function cleanReport(input) {
+  if (!input || typeof input !== 'object') return null;
+  const str = (v, max) => (typeof v === 'string' ? v.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim().slice(0, max) : '');
+  const list = (v, n) => (Array.isArray(v) ? v.map((x) => str(x, 420)).filter(Boolean).slice(0, n) : []);
+  const report = {
+    headline: str(input.headline, 320),
+    strengths: list(input.strengths, 3),
+    gaps: list(input.gaps, 3),
+    actions: list(input.actions, 3),
+    bottomLine: str(input.bottomLine, 520),
+  };
+  if (!report.headline || !report.bottomLine || !report.strengths.length || !report.gaps.length || report.actions.length < 3) return null;
+  return report;
 }
 
 // ---- rate limiting (in memory; resets when the container restarts) ----
@@ -136,16 +161,25 @@ function allow(ip) {
     day = today;
     dayCount = 0;
   }
-  if (dayCount >= DAILY_CAP) return false;
+  if (dayCount >= DAILY_CAP) return 0;
   const recent = (hits.get(ip) || []).filter((t) => now - t < 3600_000);
   if (recent.length >= PER_IP_PER_HOUR) {
     hits.set(ip, recent);
-    return false;
+    return 0;
   }
   recent.push(now);
   hits.set(ip, recent);
   dayCount += 1;
-  return true;
+  return now;
+}
+// A report that failed on our side should not count against the visitor or the daily cap.
+function refund(ip, stamp) {
+  const ts = hits.get(ip) || [];
+  const i = ts.indexOf(stamp);
+  if (i !== -1) {
+    ts.splice(i, 1);
+    if (new Date(stamp).toISOString().slice(0, 10) === day && dayCount > 0) dayCount -= 1;
+  }
 }
 setInterval(() => {
   const now = Date.now();
@@ -192,24 +226,39 @@ async function handleReport(req, res) {
 
   // The proxy in front appends the real client address last; ignore anything a client prepends.
   const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',').pop().trim();
-  if (!allow(ip)) return sendJson(res, 429, { error: 'rate_limited' });
+  const stamp = allow(ip);
+  if (!stamp) return sendJson(res, 429, { error: 'rate_limited' });
 
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const r = await fetch(API_URL, {
       method: 'POST',
       headers: { 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', ...(WORKSPACE_ID ? { 'anthropic-workspace-id': WORKSPACE_ID } : {}) },
-      body: JSON.stringify({ model: MODEL, max_tokens: 1200, messages: [{ role: 'user', content: buildPrompt(parsed) }] }),
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1500,
+        tools: [REPORT_TOOL],
+        tool_choice: { type: 'tool', name: REPORT_TOOL.name },
+        messages: [{ role: 'user', content: buildPrompt(parsed) }],
+      }),
       signal: AbortSignal.timeout(25_000),
     });
     if (!r.ok) {
       console.error('anthropic status', r.status);
+      refund(ip, stamp);
       return sendJson(res, 502, { error: 'upstream_error' });
     }
     const data = await r.json();
-    const text = Array.isArray(data.content) ? data.content.map((c) => c.text || '').join('') : '';
-    return sendJson(res, 200, { text });
+    const block = Array.isArray(data.content) ? data.content.find((c) => c && c.type === 'tool_use') : null;
+    const report = cleanReport(block && block.input);
+    if (!report) {
+      console.error('anthropic reply had no usable report');
+      refund(ip, stamp);
+      return sendJson(res, 502, { error: 'upstream_error' });
+    }
+    return sendJson(res, 200, { report });
   } catch (e) {
     console.error('anthropic call failed:', e.name);
+    refund(ip, stamp);
     return sendJson(res, 502, { error: 'upstream_error' });
   }
 }
