@@ -43,7 +43,7 @@ flowchart LR
 ```
 
 - `site/index.html` is the whole page. `site/pdf-report.js` lays out the PDF and is loaded, with the PDF library and fonts, only when a visitor asks for the download. `site/questions.js` is the question bank, shared by the page and the server so the two can never disagree about which questions exist.
-- `server.js` (~330 lines, no npm dependencies) serves the page and exposes one route, `POST /api/report`, which returns the report as structured fields (headline, strengths, gaps, actions, bottom line).
+- `server.js` (~320 lines, no npm dependencies) serves the page and exposes one route, `POST /api/report`, which returns the report as structured fields (headline, strengths, gaps, actions, bottom line).
 - The same VPS also runs my personal site and its assistant, each in its own container behind Traefik.
 
 ## Design decisions
